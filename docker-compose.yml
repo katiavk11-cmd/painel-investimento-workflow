@@ -40,8 +40,11 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?Defina POSTGRES_DB no .env}
       POSTGRES_USER: ${POSTGRES_USER:?Defina POSTGRES_USER no .env}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_SSLMODE: disable
+      DB_LOAD_SCRIPT: import.sql
       REDIS_URL: redis://redis:6379
       REDIS_PASSWORD: ${REDIS_PASSWORD:?Defina REDIS_PASSWORD no .env}
+      REDIS_TLS_ENABLED: "false"
       CACHE_TTL: ${CACHE_TTL:-5m}
       CACHE_TELEMETRIA_TTL: ${CACHE_TELEMETRIA_TTL:-30s}
     depends_on:

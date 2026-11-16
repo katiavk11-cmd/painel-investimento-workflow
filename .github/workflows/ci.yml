@@ -1,4 +1,4 @@
-## CI (build + testes) e CD (deploy no Render) para a aplicacao Quarkus.
+## CI (build + testes) e validacao do ambiente Docker (PostgreSQL + Redis + App) no GitHub Actions.
 
 name: CI/CD
 
@@ -29,19 +29,33 @@ jobs:
         run: ./mvnw verify -B
 
   deploy:
-    # So faz deploy em push na main (nunca em PR) e somente se o build passou.
     needs: build
     if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    environment: production
     concurrency:
       group: deploy-production
       cancel-in-progress: false
     steps:
-      - name: Trigger deploy no Render
-        run: curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK_URL }}"
+      - uses: actions/checkout@v5
 
-      - name: Aguardar boot e validar health
+      - name: Subir ambiente Docker (PostgreSQL, Redis e Aplicacao)
         run: |
-          sleep 180
-          curl -f https://painel-investimento.onrender.com/q/health/ready || exit 1
+          cp .env.example .env
+          docker compose up -d --build
+
+      - name: Aguardar boot e validar health (/q/health/ready)
+        run: |
+          for i in $(seq 1 30); do
+            if curl -fsS http://localhost:8080/q/health/ready; then
+              echo ""
+              echo "Aplicacao pronta e saudavel!"
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs
+          exit 1
+
+      - name: Encerrar containers
+        if: always()
+        run: docker compose down -v
