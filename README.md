@@ -1,5 +1,7 @@
 # Painel de Investimentos - Caixaverso
 
+[![CI/CD](https://github.com/katiavk11-cmd/painel-investimento-workflow/actions/workflows/ci.yml/badge.svg)](https://github.com/katiavk11-cmd/painel-investimento-workflow/actions/workflows/ci.yml)
+
 API REST para simulação e acompanhamento de investimentos, com autenticação JWT,
 recomendação de produtos por perfil de risco e registro de telemetria.
 
@@ -86,3 +88,20 @@ Execute a suíte completa:
 
 Os testes de integração usam PostgreSQL e Redis isolados via Dev Services e
 requerem Docker.
+
+## CI/CD — GitHub Actions
+
+O pipeline configurado em [`.github/workflows/ci.yml`](.github/workflows/ci.yml) executa automaticamente a cada `push` ou `pull_request` na branch `main`:
+
+- **Última execução validada:** [Run #43918680788](https://github.com/katiavk11-cmd/painel-investimento-workflow/actions/runs/43918680788)
+
+| Job | Etapa | Resultado |
+| --- | --- | --- |
+| **`build`** | `Run actions/checkout@v5` | `success` |
+| **`build`** | `Set up JDK 25` | `success` |
+| **`build`** | `Build (./mvnw verify -B)` | `success` |
+| **`deploy`** | `Run actions/checkout@v5` | `success` |
+| **`deploy`** | `Subir ambiente Docker (PostgreSQL, Redis e Aplicacao)` | `success` |
+| **`deploy`** | `Aguardar boot e validar health (/q/health/ready)` | `success` |
+| **`deploy`** | `Encerrar containers` | `success` |
+
